@@ -1,0 +1,26 @@
+FUNCTION = modifyWaterTracker REQUIRE (currentData AND data AND typeOfModification)
+    IF typeOfModification == "add" THEN DO
+        RETURN currentData + data
+    ELSE DO 
+        RETURN currentData - data
+
+FUNCTION = changeDailyTarget
+    SET SCREEN = "Daily Target Activity.kt"
+    IF dataModified = "Workouts" THEN DO
+        RETURN "activityCount" AND "minuteCount"
+    ELSE DO
+        RETURN "waterTargetCount"
+
+FUNCTION = modifyWorkoutTracker REQUIRE (currentTime AND currentWorkouts AND timeData AND workoutData)
+    RETURN "currentTime" + "timeData" AND "currentWorkouts" + "workoutData" 
+
+FUNCTION = timer REQUIRE (actionType)
+    WHILE "actionType" == "start" DO
+        WAIT 1 SECOND
+        time = time + 1
+    
+    INPUT actionToTake = "save" OR "reset"
+    IF "actionToTake" == "save" THEN
+        RETURN "time" / 60
+    ELSE DO
+        RETURN  
