@@ -35,10 +35,10 @@ You are now to create the program. It will begin as a prototype so the looks do 
 - Have some sort of timer that can be used to time workouts
 - Has multiple screens OR One other creative function that would be suitable for a wellness gym / spa ( This is where you can show your creativity here)
 
-Ateempted criteria for this task;
+Attempted criteria for this task;
 
 - P5: Produce a mobile app that meets the design criteria.
-- P6: Test a mobile app for fuinctionality, usability, stability and performance.
+- P6: Test a mobile app for functionality, usability, stability and performance.
 - P7: Review the extent to which the mobile app meets the identified requirements.
 - M3: Optimise a mobile app that meets the design criteria.
 
@@ -88,7 +88,7 @@ The Pseudocode can be found as a text file [here](/Pseudocode.txt).
 ### Layout
 Now for the beginning of development, we will first create the layout using Jetpack Compose, this will also feature the Material Theme and it's typography, colours and elements. The app will contain well selected colours for each element but differ from the mock-up's design, I will however try to preserve as much of the mockup's text as possible because that will be needed.
 
-As noted before, the app will feature a modular approach as each section will be seperated into their own functions, this can be viewed in the main kotlin file [here](/app/src/main/java/com/assignment/habitally/MainActivity.kt).
+As noted before, the app will feature a modular approach as each section will be separated into their own functions, this can be viewed in the main kotlin file [here](/app/src/main/java/com/assignment/habitally/MainActivity.kt).
 
 ## Testing process
 
