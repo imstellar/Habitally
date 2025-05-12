@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,16 +60,10 @@ fun App() {
                     ),
                     title = {
                         Column {
-                            Text(
-                                text = "Welcome to Habitally"
-                            )
-                            Text(
-                                modifier = Modifier.padding(top = 4.dp),
-                                text = "Get started by tracking your habits below",
-                                style = MaterialTheme.typography.titleMedium
-                            )
+                            Text("Welcome to Habitally")
+                            Text(modifier = Modifier.padding(top = 4.dp), text = "Get started by tracking your habits below", style = MaterialTheme.typography.titleMedium)
                         }
-                    },
+                    }
                 )
             },
             bottomBar = {
@@ -80,20 +76,8 @@ fun App() {
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Button(
-                            onClick = {  }
-                        ) {
-                            Text(
-                                text = "Overview"
-                            )
-                        }
-                        Button(
-                            onClick = { }
-                        ) {
-                            Text (
-                                text = "Targets"
-                            )
-                        }
+                        Button(onClick = {}) {Text("Overview")}
+                        Button(onClick = {}) {Text ("Targets") }
                     }
                 }
             }
@@ -106,7 +90,9 @@ fun App() {
 
         ) { innerPadding ->
             Column (
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
             ) {
                 WaterTracker()
                 WorkoutTracker()
@@ -129,20 +115,13 @@ fun WaterTracker() {
                 .background(MaterialTheme.colorScheme.secondaryContainer)
         ) {
             Text(
-                text = "Water",
-                modifier = Modifier.padding(
-                    top = 12.dp,
-                    start = 12.dp
-                ),
+                "Water",
+                modifier = Modifier.padding(top = 12.dp, start = 12.dp),
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
-                text = "You're made of it - make sure you drink enough",
-                modifier = Modifier.padding(
-                    top = 4.dp,
-                    start = 12.dp,
-                    bottom = 12.dp
-                ),
+                "You're made of it - make sure you drink enough",
+                modifier = Modifier.padding(top = 4.dp, start = 12.dp, bottom = 12.dp),
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -150,38 +129,41 @@ fun WaterTracker() {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    start = 16.dp,
-                    end = 16.dp
-                )
+                .padding(start = 16.dp, end = 16.dp)
+                .clip(shape = RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.secondaryContainer)
         ) {
             Column(
                 modifier = Modifier
-                    .clip(shape = RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
                     .padding(12.dp)
             ) {
-                Text(text = "Today")
+                Text("Today")
                 Text(
+                    "$waterCount ml",
                     modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
-                    text = "$waterCount ML",
-                    style = MaterialTheme.typography.bodyMedium)
+                    style = MaterialTheme.typography.bodyMedium
+                )
                 Text(
-                    text = "Equal to " + waterCount / 60 + " glasses",
+                    "Equal to " + waterCount / 60 + " glasses",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
             Column(
                 modifier = Modifier
-                    .clip(shape = RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
                     .padding(12.dp)
                     .align(alignment = Alignment.TopEnd),
                 horizontalAlignment = Alignment.End
             ) {
-                Text(text = "Your daily average")
-                Text(modifier = Modifier.padding(top = 4.dp, bottom = 4.dp), text = "Based on the last 7 days", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "$waterCountWeekly ML", style = MaterialTheme.typography.bodyMedium)
+                Text("Your daily average")
+                Text(
+                    "Based on the last 7 days",
+                    modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    "$waterCountWeekly ml",
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
         Column (
@@ -190,107 +172,86 @@ fun WaterTracker() {
                 .padding(16.dp)
                 .clip(shape = RoundedCornerShape(8.dp))
                 .background(MaterialTheme.colorScheme.secondaryContainer)
-
         ) {
             Row (
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                horizontalArrangement = Arrangement.End,
                 modifier = Modifier
-                    .padding(8.dp)
                     .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 8.dp, end = 4.dp)
             ) {
                 OutlinedButton (onClick = {},
                     modifier = Modifier
-                        .padding(
-                            start = 8.dp,
-                            end = 8.dp
-                )) {
-                    Text (
-                        text = "-200ml"
-                    )
-                }
-                OutlinedButton (onClick = {},
-                    modifier = Modifier
-                        .padding(
-                            start = 8.dp,
-                            end = 8.dp)
+                        .fillMaxWidth(0.6f)
+                        .padding(start = 8.dp)
                 ) {
-                    Text (
-                        text = "-1000ml"
-                    )
+                    Text("- 1000ml")
+                }
+                Button (onClick = {},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp, end = 8.dp)
+                ) {
+                    Text("- 200ml")
                 }
             }
             Row (
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                horizontalArrangement = Arrangement.End,
                 modifier = Modifier
-                    .padding(8.dp)
                     .fillMaxWidth()
+                    .padding(bottom = 8.dp, end = 4.dp)
             ) {
                 OutlinedButton (
                     onClick = {},
                     modifier = Modifier
-                        .padding(
-                            start = 8.dp,
-                            end = 8.dp)
+                        .fillMaxWidth(0.6f)
+                        .padding(start = 8.dp)
                 ) {
-                    Text (
-                        text = "+200ml"
-                    )
+                    Text("+ 1000ml")
                 }
-                OutlinedButton (
+                Button (
                     onClick = {},
                     modifier = Modifier
-                        .padding(
-                            start = 8.dp,
-                            end = 8.dp)
+                        .fillMaxWidth()
+                        .padding(start = 8.dp, end = 8.dp)
                 ) {
-                    Text (
-                        text = "+1000ml"
-                    )
+                    Text("+ 200ml")
                 }
             }
         }
         Box (
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 16.dp
-                )
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
                 .clip(shape = RoundedCornerShape(8.dp))
                 .background(MaterialTheme.colorScheme.secondaryContainer)
         ) {
             Text(
-                modifier = Modifier.padding(12.dp),
-                text = "Your daily target:"
+                "Your daily target:",
+                modifier = Modifier.padding(12.dp)
             )
-            Text (
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(12.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                text = "None set"
+            Text(
+                "None set",
+                modifier = Modifier.align(Alignment.BottomStart).padding(12.dp),
+                style = MaterialTheme.typography.bodyMedium
             )
-            Button (
+            OutlinedButton (
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .padding(12.dp),
                 onClick = {}
             ) {
-                Text (
-                    text = "Change"
-                )
+                Text("Change")
             }
         }
         HorizontalDivider(
-            modifier = Modifier.padding(
-                start = 32.dp,
-                end = 32.dp,
-                bottom = 16.dp
-            ),
+            modifier = Modifier
+                .padding(
+                    start = 32.dp,
+                    end = 32.dp,
+                    bottom = 16.dp
+                ),
             thickness = 1.dp,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+            color = MaterialTheme.colorScheme.onSurface)
     }
 }
 
@@ -313,53 +274,79 @@ fun WorkoutTracker() {
                 .background(MaterialTheme.colorScheme.secondaryContainer)
         ) {
             Text(
-                text = "Workouts",
-                modifier = Modifier.padding(
-                    top = 12.dp,
-                    start = 12.dp,
-                    bottom = 4.dp
-                ),
+                "Workouts",
+                modifier = Modifier.padding(start = 12.dp, top = 12.dp, bottom = 4.dp),
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
-                text = "Put your excess energy to use",
-                modifier = Modifier.padding(
-                    start = 12.dp,
-                    bottom = 12.dp
-                ),
+                "Put your excess energy to use",
+                modifier = Modifier.padding(start = 12.dp, bottom = 12.dp),
                 style = MaterialTheme.typography.bodyMedium
             )
         }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    start = 16.dp,
-                    end = 16.dp
-                )
+                .padding(start = 16.dp, end = 16.dp)
+                .clip(shape = RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.secondaryContainer)
         ) {
-            Column(
-                modifier = Modifier
-                    .clip(shape = RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
-                    .padding(12.dp)
-            ) {
-                Text(text = "Today")
-                Text(modifier = Modifier.padding(top = 4.dp, bottom = 4.dp), text = "$workoutMinutes minutes", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "$workoutActivitiesOutput activities", style = MaterialTheme.typography.bodyMedium)
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text("Today")
+                Text(
+                    "$workoutMinutes minutes",
+                    modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    "$workoutActivitiesOutput activities",
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
             Column(
                 modifier = Modifier
-                    .clip(shape = RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
                     .padding(12.dp)
                     .align(alignment = Alignment.TopEnd),
                 horizontalAlignment = Alignment.End
             ) {
-                Text(text = "Your daily average")
-                Text(modifier = Modifier.padding(top = 4.dp, bottom = 4.dp), text = "Based on the last 7 days", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "$workoutMinutesWeekly minutes", style = MaterialTheme.typography.bodyMedium)
+                Text("Your daily average")
+                Text(
+                    "Based on the last 7 days",
+                    modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    "$workoutMinutesWeekly minutes",
+                    modifier = Modifier.padding(bottom = 4.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    "$workoutActivitiesWeeklyOutput activities",
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
+        }
+        Row (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .clip(shape = RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.secondaryContainer)
+        ) {
+            OutlinedButton (
+                onClick = {},
+                modifier = Modifier.padding(8.dp)
+            ) { Text("+ 10m") }
+            OutlinedButton (
+                onClick = {},
+                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
+            ) { Text("- 10m") }
+            Button(
+                onClick = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) { Text("Confirm") }
         }
     }
 }
