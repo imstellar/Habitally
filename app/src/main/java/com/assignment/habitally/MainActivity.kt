@@ -348,6 +348,24 @@ fun WorkoutTracker() {
                     .padding(8.dp)
             ) { Text("Confirm") }
         }
+        Box (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp)
+                .clip(shape = RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.secondaryContainer)
+        ) {
+            Column (
+                modifier = Modifier.padding(12.dp)
+            )  {
+                Text("Your daily target:", )
+                Text("0 minutes", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp, bottom = 4.dp))
+                Text("No activities", style = MaterialTheme.typography.bodyMedium)
+            }
+            OutlinedButton(modifier = Modifier.align(Alignment.CenterEnd).padding(12.dp), onClick = {}) {
+                Text("Change")
+            }
+        }
     }
 }
 
