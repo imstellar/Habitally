@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -21,21 +22,28 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.text.isDigitsOnly
 import com.assignment.habitally.ui.theme.HabitAllyTheme
+import kotlinx.coroutines.delay
+import kotlin.concurrent.timer
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,8 +102,23 @@ fun App() {
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
             ) {
+                var workoutMinutes by remember {mutableIntStateOf(0)}
+                var workoutActivities by remember {mutableIntStateOf(0)}
+                var workoutTargetMinutes by remember {mutableIntStateOf(0)}
+                var workoutTargetActivity by remember {mutableIntStateOf(0)}
+
                 WaterTracker()
-                WorkoutTracker()
+                WorkoutTracker(
+                    workoutMinutes,
+                    onWorkoutMinutesChanged = {value -> workoutMinutes = value},
+                    workoutActivities,
+                    onWorkoutActivitiesChanged = {value -> workoutActivities = value},
+                    workoutTargetMinutes,
+                    workoutTargetActivity
+                )
+                WorkoutTimer(
+                    onTimerSubmission = {value -> workoutMinutes = value}
+                )
             }
         }
     }
@@ -104,7 +127,6 @@ fun App() {
 @Composable
 fun WaterTracker() {
     var waterCount by remember { mutableIntStateOf(0) }
-    var waterCountWeekly by remember { mutableIntStateOf(waterCount) }
 
     Column {
         Column(
@@ -125,7 +147,6 @@ fun WaterTracker() {
                 style = MaterialTheme.typography.bodyMedium
             )
         }
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -144,7 +165,7 @@ fun WaterTracker() {
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    "Equal to " + waterCount / 60 + " glasses",
+                    "Equal to " + waterCount / 200 + " glasses",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -161,7 +182,7 @@ fun WaterTracker() {
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    "$waterCountWeekly ml",
+                    "$waterCount ml",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -179,14 +200,18 @@ fun WaterTracker() {
                     .fillMaxWidth()
                     .padding(top = 8.dp, bottom = 8.dp, end = 4.dp)
             ) {
-                OutlinedButton (onClick = {},
+                OutlinedButton (onClick = {
+                    waterCount = if (waterCount >= 1000) waterCount - 1000 else 0
+                },
                     modifier = Modifier
                         .fillMaxWidth(0.6f)
                         .padding(start = 8.dp)
                 ) {
                     Text("- 1000ml")
                 }
-                Button (onClick = {},
+                Button (onClick = {
+                    waterCount = if (waterCount >= 200) waterCount - 200 else 0
+                },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 8.dp, end = 8.dp)
@@ -201,7 +226,9 @@ fun WaterTracker() {
                     .padding(bottom = 8.dp, end = 4.dp)
             ) {
                 OutlinedButton (
-                    onClick = {},
+                    onClick = {
+                        waterCount = waterCount + 1000
+                    },
                     modifier = Modifier
                         .fillMaxWidth(0.6f)
                         .padding(start = 8.dp)
@@ -209,7 +236,9 @@ fun WaterTracker() {
                     Text("+ 1000ml")
                 }
                 Button (
-                    onClick = {},
+                    onClick = {
+                        waterCount = waterCount + 200
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 8.dp, end = 8.dp)
@@ -227,11 +256,11 @@ fun WaterTracker() {
         ) {
             Text(
                 "Your daily target:",
-                modifier = Modifier.padding(start = 12.dp, top = 12.dp, bottom = 4.dp)
+                modifier = Modifier.padding(12.dp)
             )
             Text(
                 "None set",
-                modifier = Modifier.align(Alignment.BottomStart).padding(start = 12.dp, bottom = 12.dp),
+                modifier = Modifier.align(Alignment.BottomStart).padding(12.dp),
                 style = MaterialTheme.typography.bodyMedium
             )
             OutlinedButton (
@@ -256,16 +285,18 @@ fun WaterTracker() {
 }
 
 @Composable
-fun WorkoutTracker() {
+fun WorkoutTracker(
+    workoutMinutes: Int,
+    onWorkoutMinutesChanged: (Int) -> Unit,
+    workoutActivities: Int,
+    onWorkoutActivitiesChanged: (Int) -> Unit,
+    workoutTargetMinutes: Int,
+    workoutTargetActivity: Int
+) {
     Column {
-        var workoutMinutes by remember {mutableIntStateOf(0)}
-        var workoutMinutesWeekly by remember {mutableIntStateOf(0)}
-        var workoutActivities by remember {mutableIntStateOf(0)}
-        var workoutActivitiesWeekly by remember {mutableIntStateOf(0)}
-
         var workoutActivitiesOutput = if (workoutActivities == 0) "No" else workoutActivities.toString()
-        var workoutActivitiesWeeklyOutput = if (workoutActivitiesWeekly == 0) "No" else workoutActivitiesWeekly.toString()
-
+        var workoutTargetActivityOutput = if (workoutTargetActivity == 0) "No" else workoutTargetActivity.toString()
+        var temp by remember {mutableIntStateOf(0)}
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -300,6 +331,11 @@ fun WorkoutTracker() {
                 )
                 Text(
                     "$workoutActivitiesOutput activities",
+                    modifier = Modifier.padding(bottom = 4.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    "$temp minutes pending",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -316,12 +352,12 @@ fun WorkoutTracker() {
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    "$workoutMinutesWeekly minutes",
+                    "$workoutMinutes minutes",
                     modifier = Modifier.padding(bottom = 4.dp),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    "$workoutActivitiesWeeklyOutput activities",
+                    "$workoutActivitiesOutput activities",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -333,16 +369,28 @@ fun WorkoutTracker() {
                 .clip(shape = RoundedCornerShape(8.dp))
                 .background(MaterialTheme.colorScheme.secondaryContainer)
         ) {
-            OutlinedButton (
-                onClick = {},
-                modifier = Modifier.padding(8.dp)
-            ) { Text("+ 10m") }
-            OutlinedButton (
-                onClick = {},
-                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
-            ) { Text("- 10m") }
+            var enteredText by remember {mutableStateOf("")}
+            OutlinedTextField(
+                value = enteredText,
+                onValueChange = {newText ->
+                    // Only allow digits to be entered
+                    if (newText.isDigitsOnly()) {
+                        enteredText = newText
+                    } else if (newText.isEmpty()) {
+                        enteredText = "" // Allow clearing the field
+                    }
+                },
+                label = { Text("Enter Minutes") },
+                modifier = Modifier.fillMaxWidth(0.5f)
+            )
             Button(
-                onClick = {},
+                onClick = {
+                    if (enteredText.isNotEmpty()) {
+                        onWorkoutActivitiesChanged(workoutActivities + 1)
+                        onWorkoutMinutesChanged(workoutMinutes + enteredText.toInt())
+                        enteredText = ""
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
@@ -359,11 +407,103 @@ fun WorkoutTracker() {
                 modifier = Modifier.padding(12.dp)
             )  {
                 Text("Your daily target:")
-                Text("0 minutes", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp, bottom = 4.dp))
-                Text("No activities", style = MaterialTheme.typography.bodyMedium)
+                Text("$workoutTargetMinutes minutes", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp, bottom = 4.dp))
+                Text("$workoutTargetActivityOutput activities", style = MaterialTheme.typography.bodyMedium)
             }
             OutlinedButton(modifier = Modifier.align(Alignment.CenterEnd).padding(12.dp), onClick = {}) {
                 Text("Change")
+            }
+        }
+    }
+    HorizontalDivider(
+        modifier = Modifier
+            .padding(vertical = 16.dp, horizontal = 32.dp),
+        thickness = 1.dp,
+        color = MaterialTheme.colorScheme.onSurface)
+}
+
+@Composable
+fun WorkoutTimer(
+    onTimerSubmission: (Int) -> Unit,
+) {
+    var timerSeconds by remember {mutableIntStateOf(0)}
+    var timerMinutes: Int = timerSeconds / 60
+    var timerHours: Int = timerSeconds / 3600
+
+    var timerState by remember {mutableIntStateOf(-1)}
+    Column (modifier = Modifier.padding(bottom = 16.dp)) {
+        Column (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp, 0.dp, 16.dp, 16.dp)
+                .clip(shape = RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.secondaryContainer)
+        ) {
+            Text(
+                "Timer",
+                modifier = Modifier.padding(start = 12.dp, top = 12.dp, bottom = 4.dp),
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                "Start a new workout instantly",
+                modifier = Modifier.padding(start = 12.dp, bottom = 12.dp),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp)
+                .clip(shape = RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.secondaryContainer)
+        ) {
+            Column (
+                modifier = Modifier
+                    .padding(12.dp)
+            ) {
+                Text ("This workout")
+                Text (
+                    "$timerSeconds seconds",
+                    modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text (
+                    "$timerMinutes minutes",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text (
+                    "$timerHours hours",
+                    modifier = Modifier.padding(top = 4.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            Column (modifier = Modifier.padding(12.dp).align(alignment = Alignment.BottomEnd)) {
+                OutlinedButton (
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                        .fillMaxWidth(0.5f),
+                    enabled = timerState == 0,
+                    onClick = {
+                        timerState = -1
+                        timerSeconds = 0
+                    }
+                ) {
+                    Text ("Reset")
+                }
+                Button (
+                    modifier = Modifier.fillMaxWidth(0.5f),
+                    onClick = {timerState = if (timerState != 1) 1 else 0}
+                ) {
+                    Text(text = if (timerState != 1) "Start" else "Pause")
+                }
+            }
+
+            val coroutineScope = rememberCoroutineScope()
+            LaunchedEffect(timerState) {
+                while (timerState == 1) {
+                    delay(1000L)
+                    timerSeconds++
+                }
             }
         }
     }
