@@ -83,6 +83,10 @@ For pseudocode, I will only cover the functionality of the program, in parts, su
 
 The Pseudocode can be found as a text file [here](/Pseudocode.txt).
 
+### Additional information
+With all the above in consideration, during developement you must consider everyone that would use the app, in this case we should look at people that have additional needs, settings or specific types of devices. To ensure all these neeeds are met my planning process aims to ensure the text is readable, the colours are well-contrasted and the spacing is good for any user interaction no matter who the user may be. 
+
+These points need to be constantly referenced when making the app to ensure the deviation from the original designs and such do not impair how the user of the app may be able to access its services. To do so I would like to use frameworks such as "Scaffolds" that create natural spacing from the top or bottom of the device screen, "Material Theme" which is a framework that allows the device to decide the right colours and text styles based on the user's selected theme and screen size of their device. The important part about these points is that all of it is incorporated into Android Studio by default and is ready to be used when needed without the requirement of upkeeping these features.
 ## Developing process
 
 ### Layout

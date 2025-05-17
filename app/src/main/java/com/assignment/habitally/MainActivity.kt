@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -33,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import com.assignment.habitally.ui.theme.HabitAllyTheme
 import kotlinx.coroutines.delay
-import kotlin.concurrent.timer
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -201,13 +198,13 @@ fun WaterTracker() {
                     .padding(top = 8.dp, bottom = 8.dp, end = 4.dp)
             ) {
                 OutlinedButton (onClick = {
-                    waterCount = if (waterCount >= 1000) waterCount - 1000 else 0
+                    waterCount = if (waterCount >= 500) waterCount - 500 else 0
                 },
                     modifier = Modifier
                         .fillMaxWidth(0.6f)
                         .padding(start = 8.dp)
                 ) {
-                    Text("- 1000ml")
+                    Text("- 500ml")
                 }
                 Button (onClick = {
                     waterCount = if (waterCount >= 200) waterCount - 200 else 0
@@ -227,13 +224,13 @@ fun WaterTracker() {
             ) {
                 OutlinedButton (
                     onClick = {
-                        waterCount = waterCount + 1000
+                        waterCount = waterCount + 500
                     },
                     modifier = Modifier
                         .fillMaxWidth(0.6f)
                         .padding(start = 8.dp)
                 ) {
-                    Text("+ 1000ml")
+                    Text("+ 500ml")
                 }
                 Button (
                     onClick = {
@@ -296,7 +293,6 @@ fun WorkoutTracker(
     Column {
         var workoutActivitiesOutput = if (workoutActivities == 0) "No" else workoutActivities.toString()
         var workoutTargetActivityOutput = if (workoutTargetActivity == 0) "No" else workoutTargetActivity.toString()
-        var temp by remember {mutableIntStateOf(0)}
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -334,10 +330,6 @@ fun WorkoutTracker(
                     modifier = Modifier.padding(bottom = 4.dp),
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Text(
-                    "$temp minutes pending",
-                    style = MaterialTheme.typography.bodyMedium
-                )
             }
             Column(
                 modifier = Modifier
@@ -363,6 +355,7 @@ fun WorkoutTracker(
             }
         }
         Row (
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
@@ -373,17 +366,17 @@ fun WorkoutTracker(
             OutlinedTextField(
                 value = enteredText,
                 onValueChange = {newText ->
-                    // Only allow digits to be entered
                     if (newText.isDigitsOnly()) {
                         enteredText = newText
                     } else if (newText.isEmpty()) {
-                        enteredText = "" // Allow clearing the field
+                        enteredText = ""
                     }
                 },
-                label = { Text("Enter Minutes") },
-                modifier = Modifier.fillMaxWidth(0.5f)
+                label = { Text("Minutes") },
+                modifier = Modifier.fillMaxWidth(0.5f).padding(start = 12.dp, top = 4.dp, end = 12.dp, bottom = 12.dp)
             )
             Button(
+                enabled = enteredText.isNotEmpty(),
                 onClick = {
                     if (enteredText.isNotEmpty()) {
                         onWorkoutActivitiesChanged(workoutActivities + 1)
@@ -393,7 +386,7 @@ fun WorkoutTracker(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
+                    .padding(end = 12.dp)
             ) { Text("Confirm") }
         }
         Box (
@@ -427,8 +420,8 @@ fun WorkoutTimer(
     onTimerSubmission: (Int) -> Unit,
 ) {
     var timerSeconds by remember {mutableIntStateOf(0)}
-    var timerMinutes: Int = timerSeconds / 60
-    var timerHours: Int = timerSeconds / 3600
+    var timerMinutes by remember {mutableIntStateOf(0)}
+    var timerHours by remember {mutableIntStateOf(0)}
 
     var timerState by remember {mutableIntStateOf(-1)}
     Column (modifier = Modifier.padding(bottom = 16.dp)) {
@@ -498,11 +491,18 @@ fun WorkoutTimer(
                 }
             }
 
-            val coroutineScope = rememberCoroutineScope()
             LaunchedEffect(timerState) {
                 while (timerState == 1) {
                     delay(1000L)
                     timerSeconds++
+                    if (timerSeconds >= 60) {
+                        timerSeconds = 0
+                        timerMinutes = timerMinutes + 20
+                        if (timerMinutes >= 60) {
+                            timerMinutes = 0
+                            timerHours++
+                        }
+                    }
                 }
             }
         }
