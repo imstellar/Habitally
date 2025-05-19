@@ -9,9 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -27,13 +28,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.assignment.habitally.data.AppState
 import kotlinx.coroutines.delay
-import com.assignment.habitally.SectionHeader
-import com.assignment.habitally.SectionDetails
 
 
 @Composable
@@ -44,7 +45,7 @@ fun AppHome(onNavigate: () -> Unit) {
     ) {
         WaterTracker(onNavigate)
         SectionDivider()
-        WorkoutTracker()
+        WorkoutTracker(onNavigate)
         SectionDivider()
         WorkoutTimer()
     }
@@ -120,77 +121,43 @@ fun WaterTracker(
 }
 
 @Composable
-fun WorkoutTracker() {
+fun WorkoutTracker(onNavigate: () -> Unit) {
     val viewModel: AppState = viewModel()
     Column (modifier = Modifier.padding(16.dp)) {
-        Column(
+        SectionHeader(
+            "Workouts",
+            "Put your excess energy to use"
+        )
+        SectionDetails (
+            "Today",
+            listOf(
+                if (viewModel.workoutMinutes < 60) "${viewModel.workoutMinutes} minutes" else "${viewModel.workoutMinutes / 60} hours and ${viewModel.workoutMinutes % 60} minutes",
+                if (viewModel.workoutActivities == 0) "No activities" else "${viewModel.workoutActivities} activities"),
+            "Your daily average",
+            listOf(
+                "Based on the last 7 days",
+                if (viewModel.workoutWeeklyMinutes < 60) "${viewModel.workoutWeeklyMinutes} minutes" else "${viewModel.workoutWeeklyMinutes / 60} hours and ${viewModel.workoutWeeklyMinutes % 60} minutes",
+                if (viewModel.workoutWeeklyActivities == 0) "No activities" else "${viewModel.workoutWeeklyActivities} activities")
+        )
+        Column (
+            verticalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(shape = RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp))
-        ) {
-            Text(
-                "Workouts",
-                modifier = Modifier.padding(start = 12.dp, top = 12.dp, bottom = 4.dp),
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                "Put your excess energy to use",
-                modifier = Modifier.padding(start = 12.dp, bottom = 12.dp),
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp)
-                .clip(shape = RoundedCornerShape(8.dp))
-        ) {
-            Column(modifier = Modifier.padding(12.dp)) {
-                Text("Today")
-                Text(
-                    "${viewModel.workoutMinutes} minutes",
-                    modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    "${viewModel.workoutActivities} activities",
-                    modifier = Modifier.padding(bottom = 4.dp),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-            Column(
-                modifier = Modifier
-                    .padding(12.dp)
-                    .align(alignment = Alignment.TopEnd),
-                horizontalAlignment = Alignment.End
-            ) {
-                Text("Your daily average")
-                Text(
-                    "Based on the last 7 days",
-                    modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    "${viewModel.workoutTargetMinutes} minutes",
-                    modifier = Modifier.padding(bottom = 4.dp),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    "${viewModel.workoutTargetActivities} activities",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        }
-        Row (
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .clip(shape = RoundedCornerShape(8.dp))
+                .padding(horizontal = 12.dp)
         ) {
             var enteredText by remember {mutableStateOf("")}
+            fun submitMinutes() {
+                if (enteredText == "") return
+                viewModel.updateWorkoutData(enteredText.toInt())
+                enteredText = ""
+            }
             OutlinedTextField(
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done // Or ImeAction.Go, ImeAction.Search, etc.
+                ),
+                keyboardActions = KeyboardActions(onDone = {submitMinutes()}),
                 value = enteredText,
                 onValueChange = {newText ->
                     if (newText.isDigitsOnly()) {
@@ -199,80 +166,44 @@ fun WorkoutTracker() {
                         enteredText = ""
                     }
                 },
-                label = { Text("Minutes") },
-                modifier = Modifier.fillMaxWidth(0.5f).padding(start = 12.dp, top = 4.dp, end = 12.dp, bottom = 12.dp)
+                label = {Text("How many minutes was your workout?", style = MaterialTheme.typography.labelMedium)},
+                modifier = Modifier.fillMaxWidth()
             )
             Button(
                 enabled = enteredText.isNotEmpty(),
-                onClick = {
-                    if (enteredText.isNotEmpty()) {
-                        viewModel.updateWorkoutData(enteredText.toInt())
-                        enteredText = ""
-                    }
-                },
+                onClick = {submitMinutes()},
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(end = 12.dp)
-            ) { Text("Confirm") }
+                    .padding(vertical = 12.dp)
+            ) { Text("Submit to records") }
         }
-        Box (
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp)
-                .clip(shape = RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp))
-        ) {
-            Column (
-                modifier = Modifier.padding(12.dp)
-            )  {
-                Text("Your daily target:")
-                Text("${viewModel.workoutTargetMinutes} minutes", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp, bottom = 4.dp))
-                Text("${viewModel.workoutTargetActivities} activities", style = MaterialTheme.typography.bodyMedium)
-            }
-            OutlinedButton(modifier = Modifier.align(Alignment.CenterEnd).padding(12.dp), onClick = {}) {
-                Text("Change")
-            }
-        }
+        var targetPresent = viewModel.workoutTargetMinutes != 0
+        SectionTarget(
+            onNavigate,
+            if (targetPresent == true) {
+                listOf(
+                    "${viewModel.workoutTargetMinutes} minutes",
+                    "${viewModel.workoutTargetActivities} activities"
+                )
+            } else { listOf("None set") }
+        )
     }
-    HorizontalDivider(
-        modifier = Modifier
-            .padding(vertical = 16.dp, horizontal = 32.dp),
-        thickness = 1.dp,
-        color = MaterialTheme.colorScheme.onSurface)
 }
 
 @Composable
 fun WorkoutTimer() {
+    val viewModel: AppState = viewModel()
     var timerSeconds by remember {mutableIntStateOf(0)}
     var timerMinutes by remember {mutableIntStateOf(0)}
     var timerHours by remember {mutableIntStateOf(0)}
 
     var timerState by remember {mutableIntStateOf(-1)}
-    Column (modifier = Modifier.padding(bottom = 16.dp)) {
-        Column (
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp, 0.dp, 16.dp, 16.dp)
-                .clip(shape = RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp))
-        ) {
-            Text(
-                "Timer",
-                modifier = Modifier.padding(start = 12.dp, top = 12.dp, bottom = 4.dp),
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                "Start a new workout instantly",
-                modifier = Modifier.padding(start = 12.dp, bottom = 12.dp),
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp)
-                .clip(shape = RoundedCornerShape(8.dp))
-        ) {
+    Column (modifier = Modifier.padding(16.dp)) {
+        SectionHeader(
+            "Timer",
+            "Start a new workout instantly"
+        )
+        Box(modifier = Modifier.fillMaxWidth()) {
             Column (
                 modifier = Modifier
                     .padding(12.dp)
@@ -280,20 +211,22 @@ fun WorkoutTimer() {
                 Text ("This workout")
                 Text (
                     "$timerSeconds seconds",
-                    modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+                    modifier = Modifier.padding(top = 4.dp),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text (
                     "$timerMinutes minutes",
+                    modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text (
                     "$timerHours hours",
-                    modifier = Modifier.padding(top = 4.dp),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-            Column (modifier = Modifier.padding(12.dp).align(alignment = Alignment.BottomEnd)) {
+            Column (modifier = Modifier
+                .padding(12.dp)
+                .align(alignment = Alignment.BottomEnd)) {
                 OutlinedButton (
                     modifier = Modifier
                         .padding(bottom = 8.dp)
@@ -302,6 +235,8 @@ fun WorkoutTimer() {
                     onClick = {
                         timerState = -1
                         timerSeconds = 0
+                        timerMinutes = 0
+                        timerHours = 0
                     }
                 ) {
                     Text ("Reset")
@@ -320,13 +255,40 @@ fun WorkoutTimer() {
                     timerSeconds++
                     if (timerSeconds >= 60) {
                         timerSeconds = 0
-                        timerMinutes = timerMinutes + 20
+                        timerMinutes++
                         if (timerMinutes >= 60) {
                             timerMinutes = 0
                             timerHours++
                         }
                     }
                 }
+            }
+        }
+        Box (
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape = RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp))
+                .padding(12.dp)
+        ) {
+            Column {
+                Text("Add to records")
+                if (timerMinutes == 0 || timerHours == 0) {Text("Your workout isn't long \nenough to be saved.", style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))}
+            }
+            OutlinedButton(
+                enabled = ((timerMinutes != 0 || timerHours != 0) && timerState == 0),
+                modifier = Modifier
+                    .fillMaxWidth(0.4f)
+                    .align(Alignment.CenterEnd),
+                onClick = {
+                    viewModel.updateWorkoutData(timerHours * 60 + timerMinutes)
+                    timerState = -1
+                    timerSeconds = 0
+                    timerMinutes = 0
+                    timerHours = 0
+                }
+            ) {
+                Text("Submit")
             }
         }
     }
