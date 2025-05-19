@@ -32,30 +32,32 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.assignment.habitally.data.AppState
 import kotlinx.coroutines.delay
 
 
 @Composable
-fun AppHome(onNavigate: () -> Unit) {
+fun AppHome(
+    appState: AppState,
+    onNavigate: () -> Unit
+) {
     Column (
         modifier = Modifier
             .verticalScroll(rememberScrollState())
     ) {
-        WaterTracker(onNavigate)
+        WaterTracker(appState, onNavigate)
         SectionDivider()
-        WorkoutTracker(onNavigate)
+        WorkoutTracker(appState, onNavigate)
         SectionDivider()
-        WorkoutTimer()
+        WorkoutTimer(appState)
     }
 }
 
 @Composable
 fun WaterTracker(
+    appState: AppState,
     onNavigate: () -> Unit
 ) {
-    val viewModel: AppState = viewModel()
     Column (
         modifier = Modifier.padding(16.dp)
     ) {
@@ -65,9 +67,9 @@ fun WaterTracker(
         )
         SectionDetails(
             "Today",
-            listOf("${viewModel.waterCount} ml", "Equal to " + viewModel.waterCount / 200 + " glasses"),
+            listOf("${appState.waterCount} ml", "Equal to " + appState.waterCount / 200 + " glasses"),
             "Your daily average",
-            listOf("Based on the last 7 days", "${viewModel.waterCount} ml")
+            listOf("Based on the last 7 days", "${appState.waterCount} ml")
         )
         Column (modifier = Modifier
             .fillMaxWidth()
@@ -80,13 +82,13 @@ fun WaterTracker(
             ) {
                 OutlinedButton (
                     onClick = {
-                        if (viewModel.waterCount <= 500) viewModel.updateWaterCount(0, 3) else viewModel.updateWaterCount(500, 2)
+                        if (appState.waterCount <= 500) appState.updateWaterCount(0, 3) else appState.updateWaterCount(500, 2)
                     },
                     modifier = Modifier.fillMaxWidth(0.6f)
                 ) { Text("- 500ml") }
                 Button (
                     onClick = {
-                        if (viewModel.waterCount <= 200) viewModel.updateWaterCount(0, 3) else viewModel.updateWaterCount(200, 2)
+                        if (appState.waterCount <= 200) appState.updateWaterCount(0, 3) else appState.updateWaterCount(200, 2)
                     },
                     modifier = Modifier
                         .padding(start = 8.dp)
@@ -99,13 +101,13 @@ fun WaterTracker(
             ) {
                 OutlinedButton (
                     onClick = {
-                        viewModel.updateWaterCount(500, 1)
+                        appState.updateWaterCount(500, 1)
                     },
                     modifier = Modifier.fillMaxWidth(0.6f)
                 ) { Text("+ 500ml") }
                 Button (
                     onClick = {
-                        viewModel.updateWaterCount(200, 1)
+                        appState.updateWaterCount(200, 1)
                     },
                     modifier = Modifier
                         .padding(start = 8.dp)
@@ -115,14 +117,16 @@ fun WaterTracker(
         }
         SectionTarget(
             onNavigate,
-            listOf(if (viewModel.waterTargetCount == 0) "None set" else "${viewModel.waterTargetCount} + ML per day")
+            listOf(if (appState.waterTargetCount == 0) "None set" else "${appState.waterTargetCount} ml per day")
         )
     }
 }
 
 @Composable
-fun WorkoutTracker(onNavigate: () -> Unit) {
-    val viewModel: AppState = viewModel()
+fun WorkoutTracker(
+    appState: AppState,
+    onNavigate: () -> Unit
+) {
     Column (modifier = Modifier.padding(16.dp)) {
         SectionHeader(
             "Workouts",
@@ -131,13 +135,13 @@ fun WorkoutTracker(onNavigate: () -> Unit) {
         SectionDetails (
             "Today",
             listOf(
-                if (viewModel.workoutMinutes < 60) "${viewModel.workoutMinutes} minutes" else "${viewModel.workoutMinutes / 60} hours and ${viewModel.workoutMinutes % 60} minutes",
-                if (viewModel.workoutActivities == 0) "No activities" else "${viewModel.workoutActivities} activities"),
+                if (appState.workoutMinutes < 60) "${appState.workoutMinutes} minutes" else "${appState.workoutMinutes / 60} hours and ${appState.workoutMinutes % 60} minutes",
+                if (appState.workoutActivities == 0) "No activities" else "${appState.workoutActivities} activities"),
             "Your daily average",
             listOf(
                 "Based on the last 7 days",
-                if (viewModel.workoutWeeklyMinutes < 60) "${viewModel.workoutWeeklyMinutes} minutes" else "${viewModel.workoutWeeklyMinutes / 60} hours and ${viewModel.workoutWeeklyMinutes % 60} minutes",
-                if (viewModel.workoutWeeklyActivities == 0) "No activities" else "${viewModel.workoutWeeklyActivities} activities")
+                if (appState.workoutWeeklyMinutes < 60) "${appState.workoutWeeklyMinutes} minutes" else "${appState.workoutWeeklyMinutes / 60} hours and ${appState.workoutWeeklyMinutes % 60} minutes",
+                if (appState.workoutWeeklyActivities == 0) "No activities" else "${appState.workoutWeeklyActivities} activities")
         )
         Column (
             verticalArrangement = Arrangement.Center,
@@ -148,14 +152,14 @@ fun WorkoutTracker(onNavigate: () -> Unit) {
             var enteredText by remember {mutableStateOf("")}
             fun submitMinutes() {
                 if (enteredText == "") return
-                viewModel.updateWorkoutData(enteredText.toInt())
+                appState.updateWorkoutData(enteredText.toInt())
                 enteredText = ""
             }
             OutlinedTextField(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Done // Or ImeAction.Go, ImeAction.Search, etc.
+                    imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = {submitMinutes()}),
                 value = enteredText,
@@ -177,13 +181,13 @@ fun WorkoutTracker(onNavigate: () -> Unit) {
                     .padding(vertical = 12.dp)
             ) { Text("Submit to records") }
         }
-        var targetPresent = viewModel.workoutTargetMinutes != 0
+        var targetPresent = appState.workoutTargetMinutes != 0
         SectionTarget(
             onNavigate,
             if (targetPresent == true) {
                 listOf(
-                    "${viewModel.workoutTargetMinutes} minutes",
-                    "${viewModel.workoutTargetActivities} activities"
+                    "${appState.workoutTargetMinutes} minutes",
+                    "${appState.workoutTargetActivities} activities"
                 )
             } else { listOf("None set") }
         )
@@ -191,8 +195,7 @@ fun WorkoutTracker(onNavigate: () -> Unit) {
 }
 
 @Composable
-fun WorkoutTimer() {
-    val viewModel: AppState = viewModel()
+fun WorkoutTimer(appState: AppState) {
     var timerSeconds by remember {mutableIntStateOf(0)}
     var timerMinutes by remember {mutableIntStateOf(0)}
     var timerHours by remember {mutableIntStateOf(0)}
@@ -281,7 +284,7 @@ fun WorkoutTimer() {
                     .fillMaxWidth(0.4f)
                     .align(Alignment.CenterEnd),
                 onClick = {
-                    viewModel.updateWorkoutData(timerHours * 60 + timerMinutes)
+                    appState.updateWorkoutData(timerHours * 60 + timerMinutes)
                     timerState = -1
                     timerSeconds = 0
                     timerMinutes = 0
