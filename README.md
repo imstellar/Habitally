@@ -49,17 +49,7 @@ Here, lies the documentation for the Task 1 and its criteria, reading this secti
 As a personal rule, I like to use the Montserrat Font Family when developing anything as I believe the font looks really good to look at and maintains accessibility. This font will be used only in the Regular, Medium and Bold styles in the application to preserve a well organised structure. This type of system is well known to ensure layouts in most interpretations feel organised, clear and concise without confusing the user with excess font styling changes.
 
 ### Colours
-For colours, I have used a Figma plugin named "Material Theme Builder", with it I have generated Primary, Secondary and Tertiary colours devices running the app will generate the rest of the colours based on the device's theme settings. The colours are dynamically picked based on dark or light theme setting on the user's device and are as follows;
-
-#### Dark Theme (80);
-- Primary, `#FFB68D`
-- Secondary, `#EABDA6`
-- Tertiary, `#CDC989`
-
-### Light Theme (40);
-- Primary, `#9B4600`
-- Secondary, `#795744`
-- Tertiary, `#63602B`
+For colours, we will be using the Android's material theme which will be carefully implemented into the app by defining surface elements, primary/secondary containers and such, after doing so, each device will adapt the app's colour theme perfectly based on their phone's colour scheme, not only is this feature set extremely versatile, but it also automatically computes colours while making sure the contrast ratios are perfect and well suited.
 
 ### Images
 While I have created some background images, I will attempt to utilise the colours of the material theme ruleset, the reasoning for this being that I want the app to follow most used material theme layouts present in modern android apps to keep it familiar. If any colours are used they will available to view inside the [drawable folder](/app/src/main/res/drawable/).
@@ -76,7 +66,7 @@ My thought process when creating the mockup is to split the screen into differen
 
 When it comes to development, I will utilise the mockup as a framework and try to reference as much of it inside the app while also making sure the app is utilising Material Theme's best practices, this may cause major deviations but it should be expected.
 
-This mockup can be found in the github files as an Axure RP 11 project, [here](/app_mockup.rp) and as a PNG file, [here](TODO).
+This mockup can be found in the github files as an Axure RP 11 project, [here](/app_mockup.rp) and as 2 PNG files, [home screen](https://gyazo.com/d0761ac93877aa0401d57e7bf5052078) and [target tracker](https://gyazo.com/1541c327509c443c1c7b69cba44942cd).
 
 ### Pseudocode
 For pseudocode, I will only cover the functionality of the program, in parts, such as adding water to the tracker or removing it. As Kotlin Composables are extremely complex, these will not be included as they are there mainly for the layout of the program itself. When making this code I will split it up into functions that make up each part of the functionality, there will be no main loop or such as it's highly irrelevant in this scenario due to the fact that the user's actions will trigger events rather than a fixed loop.
@@ -88,7 +78,9 @@ With all the above in consideration, during developement you must consider every
 
 These points need to be constantly referenced when making the app to ensure the deviation from the original designs and such do not impair how the user of the app may be able to access its services. To do so I would like to use frameworks such as "Scaffolds" that create natural spacing from the top or bottom of the device screen, "Material Theme" which is a framework that allows the device to decide the right colours and text styles based on the user's selected theme and screen size of their device. The important part about these points is that all of it is incorporated into Android Studio by default and is ready to be used when needed without the requirement of upkeeping these features.
 
-Along with that, my app design visually at this point, aims to cover each part of the specifications as requested by the client. To better explain, I have created each section for the app including the water tracker, workout tracker and workout timer sections each focused on filling one of the required points in the brief.
+To get some feedback and review my app's designs, I have created a google form, this was made after the app is complete as the mockup and working application's designs differ significantly, this means I can grasp whether the mock-up looks better or the end resulting app making it way more efficient at getting the relevant information out of each user, you can view the responses to the form and its questions via [this link](https://docs.google.com/forms/d/1pacGuQfQYiJbzNevVQLiLMqdfrAh-WZVaLkFZf3NMqc/edit#responses)
+
+The app design I have created is focused on meeting the client's explicit requirements as they have stated. To better explain, I have created each section for the app including the water tracker, workout tracker, workout timer and target setting sections each focused on filling one of the required points in the brief, this was done to ensure each part of my app fits the client's specifications by creating sections that fit each point perfectly.
 
 ## Developing process
 
@@ -97,6 +89,42 @@ Now for the beginning of development, we will first create the layout using Jetp
 
 As noted before, the app will feature a modular approach as each section will be separated into their own functions, this can be viewed in the main kotlin file [here](/app/src/main/java/com/assignment/habitally/MainActivity.kt).
 
+### Project structure;
+```
+/com.assignment.habitally/
+
+> MainActivity.kt, this stores the navigation bar including its functionality, top bar and hosts the data class from "data.kt".
+
+> AppComponents.kt, this effectively stores blueprints for components such as "SectionHeader", "SectionDetails", "SectionTarget" and "SectionDivider" - these are @Composable functions that can be called easily from the other screens and provided with some basic text to implement saving time and reducing lines used.
+
+> HomeScreen.kt, this is essentially the home page and its components, it is called when the app opens by the navHost inside "MainActivity.kt" by default, this could be classed as the MainActivity.
+
+> TargetScreen.kt, this is the other screen used in the app for changing user's targets. The user can navigate to this screen by using the "Targets" button in the navigation bar or by hitting "Change" in any of the components storing the user's daily target information.
+
+/com.assignment.habitally/data/
+> data.kt, The main brains behind the user's semi-persistant storage, this stores an "AppState" class which is instanciated from "MainActivity.kt" and is provided to "HomeScreen.kt" and "TargetScreen.kt", where it can be read and modified as needed, storing the user's tracking data, target data and the functions that can be called to edit such data when needed. This implementation could be improved by dumping the class into app's storage for the data to stay after closing but this has not been implemented as it's not required for this project.
+```
+With all this information covered, I believe this displays how my app was developed, and just how well it meets the client's requirements. With this app design, code and functionality concluded I can confidently say there is more than enough functionality to fit each one of the requirements to the fullest;
+
+- Should be able to track the amount of water someone has drunk in a day (Such as counting glasses of water drunk or litres etc)
+    - This is fully met by providing the user with options to add water in ml in common variations, (glass and half a litre), this is them added together and displayed in easy to read formats.
+- Should be able to track the number of workouts
+    - Done by the workout section which stores the user's workout time and adding a "workout" activity each time the user submits the time. This is even more flexible than the water inputs as this uses a text field allowing the user to pick a specific time rather than +10 or -10 minutes found in the mock-up's design.
+- Should have a timer that can be used during workouts.
+    - This has been met by the workout timer section, not only is this perfectly implemented but it's interactivity is well thought-out making it simple to use and allowing the user to easily add this data to their workout tracking data after the timer is paused (which it must be paused and not in the "reset" state to be submitted else the buttons are disabled).
+
 ## Testing process
 
+During the app's developement, I have had to resolve countless issues which spanned from annoyances to layout spacing issues and data persistance issues, I would like to go over any of the noteworthy issues I experienced;
+
+```
+Navigation Functionality
+> The navigation bar had multiple issues at the start making it impossible to work with from the home screen, it prevented the user from changing to the target setting screen from any of the "your daily target" sections. This was a simple but confusing issue just requiring a function called "onNavigate" being passed to each activity which can be called from any of its composables.
+
+Data persitance
+> The data stored inside "data.kt" used to be implemented with a data class, this meant each time the user changed the screen they are on it got wiped, this was a completely unacceptable drawback which prompted me to turn it into a ViewModel class instead, this saved data when to each screen even if their current activity changes however it did not fix the issue of data sync between screens. That was fixed by instantiating (creating) the class inside MainActivity and passing it to the HomeScreen and TargetScreen meaning both screens used the same one instead of creating seperate ones.
+```
+
 ## Conclusion
+
+This was an extremely fun project but it had its downsides, I was able to learn some major parts of Kotlin and Jetpack Compose all by myself in such a short timespan and still create an app that I am extrememly proud of even going further than the requirements of the project itself by implementing a hole target system to allow users to set targets for themselves, I can concludew with this that my app is fully sufficient for this assignment.
