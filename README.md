@@ -113,6 +113,8 @@ With all this information covered, I believe this displays how my app was develo
 - Should have a timer that can be used during workouts.
     - This has been met by the workout timer section, not only is this perfectly implemented but it's interactivity is well thought-out making it simple to use and allowing the user to easily add this data to their workout tracking data after the timer is paused (which it must be paused and not in the "reset" state to be submitted else the buttons are disabled).
 
+With the above I would also like to add some additional context in the terms of what optimisations I have done, as previously shown in the project structure, midway through the development process I decided to use a more general approach to how components are stored and laid out, this can be found within the `AppComponents.kt` file which covers the relevant @Composable functions, these functions accept arguments and allow the app screens to be significantly smaller in line count and prevent the overuse of code cleaning up and speeding up the general app drawing speed. This type of optimisation technique will mostly be visible on slower devices as the app doesn't do anything extremely intensive. In addition to this, my code has also been optimised in the way I have chosen to store data within a data class, there could have been significantly less elegant solutions such as basic variables spread out through the project, which was changed early in the development process making it significantly easier to use all the relevant data points in the functions that require it, this significantly reduces ram usage of the app by cutting down on repetitive variables or other data structures that are less efficient.
+
 ## Testing process
 
 During the app's developement, I have had to resolve countless issues which spanned from annoyances to layout spacing issues and data persistance issues, I would like to go over any of the noteworthy issues I experienced;
@@ -124,6 +126,8 @@ Navigation Functionality
 Data persitance
 > The data stored inside "data.kt" used to be implemented with a data class, this meant each time the user changed the screen they are on it got wiped, this was a completely unacceptable drawback which prompted me to turn it into a ViewModel class instead, this saved data when to each screen even if their current activity changes however it did not fix the issue of data sync between screens. That was fixed by instantiating (creating) the class inside MainActivity and passing it to the HomeScreen and TargetScreen meaning both screens used the same one instead of creating seperate ones.
 ```
+
+To close out the testing process, I have also created a test plan in google sheets which serves to ensure functionality of the app is consistent and well vetted, this is available [here](https://docs.google.com/spreadsheets/d/1yWupuBy_mMONS_TVjUw4argZR8bsZjDB24ZN7bUJtVY/edit?usp=sharing) 
 
 ## Conclusion
 
